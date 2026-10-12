@@ -38,11 +38,14 @@
     <div class="wrap">
       <h2>Personal</h2>
       <div>
-        <div class="prose">
-          <p>The part that is not on the CV: book reviews, writing, travel notes and videos.</p>
+        <!-- TODO: replace this sentence with your own introduction. -->
+        <p class="intro">Intro text placeholder. A sentence or two about what this page is.</p>
+        <div class="panes" data-pane-group>
+          <ol class="tl" id="timeline"></ol>
+          <div class="pane" aria-live="polite">
+            <p class="pane-empty">Select a title to read more.</p>
+          </div>
         </div>
-        <p class="empty" id="empty">Nothing here yet.</p>
-        <ul class="entries" id="entries"></ul>
       </div>
     </div>
   </section>
@@ -56,51 +59,153 @@
   </div>
 </footer>
 
-<script src="site.js"></script>
+<!-- The timeline is built here, before site.js runs. -->
 <script>
-  /* ---------------------------------------------------------------
-     PERSONAL ENTRIES
-     Add entries between the brackets, one per line:
-       { kind: "Book review", title: "Title", note: "One sentence.", url: "" },
-     "url" is optional. Leave it as "" if there is no link.
-     --------------------------------------------------------------- */
+  /* ===============================================================
+     HOW TO EDIT THIS PAGE
+
+     Every entry is one block like this:
+
+       {
+         year: 2018,
+         title: "Title of the entry",
+         when: "Summer 2018",            // optional small line under the title
+         body: [
+           "A paragraph of text.",
+           { img: "images/photo.jpg", alt: "What the picture shows", caption: "Optional caption" },
+           "More text after the picture."
+         ]
+       },
+
+     - Several entries can share a year.
+     - body mixes paragraphs (text in quotes) and pictures (the { img: ... } part)
+       in the order you want them to appear.
+     - Put your picture files in a folder called "images" next to this file.
+     - While "img" is empty (""), a dashed placeholder box is shown instead.
+     - To start with the oldest year at the top, change NEWEST_FIRST to false.
+     =============================================================== */
+
+  var NEWEST_FIRST = true;
+
+  function placeholder(year) {
+    return {
+      year: year,
+      title: "Title placeholder",
+      when: "Date placeholder",
+      body: [
+        "Text placeholder. Write the first paragraph here.",
+        { img: "", alt: "", caption: "Picture placeholder" },
+        "Text placeholder. Continue after the picture here."
+      ]
+    };
+  }
+
   var ENTRIES = [
+    placeholder(2016),
+    placeholder(2017),
+    placeholder(2018),
+    placeholder(2019),
+    placeholder(2020),
+    placeholder(2021),
+    placeholder(2022),
+    placeholder(2023),
+    placeholder(2024),
+    placeholder(2025),
+    placeholder(2026)
   ];
 
+  /* ---------- Rendering: no need to edit below this line ---------- */
   (function () {
-    var list = document.getElementById('entries');
-    var empty = document.getElementById('empty');
-    if (!ENTRIES.length) return;
-    empty.hidden = true;
+    var list = document.getElementById('timeline');
+
+    /* Group entries by year. */
+    var byYear = {};
     ENTRIES.forEach(function (e) {
+      (byYear[e.year] = byYear[e.year] || []).push(e);
+    });
+    var years = Object.keys(byYear).map(Number).sort(function (a, b) { return a - b; });
+    if (NEWEST_FIRST) years.reverse();
+
+    var n = 0;
+    years.forEach(function (year, idx) {
       var li = document.createElement('li');
+      li.className = 'tl-year';
 
-      var kind = document.createElement('span');
-      kind.className = 'kind';
-      kind.textContent = e.kind || '';
-      li.appendChild(kind);
+      /* Dashed line where years are skipped. */
+      var next = years[idx + 1];
+      if (next !== undefined && Math.abs(next - year) > 1) li.classList.add('jump');
 
-      var title;
-      if (e.url) {
-        title = document.createElement('a');
-        title.href = e.url;
-        title.rel = 'noopener';
-      } else {
-        title = document.createElement('span');
-      }
-      title.className = 'entry-title';
-      title.textContent = e.title || '';
-      li.appendChild(title);
+      var label = document.createElement('p');
+      label.className = 'tl-label';
+      label.textContent = year;
+      li.appendChild(label);
 
-      if (e.note) {
-        var note = document.createElement('span');
-        note.className = 'entry-note';
-        note.textContent = e.note;
-        li.appendChild(note);
-      }
+      var ul = document.createElement('ul');
+      ul.className = 'items';
+
+      byYear[year].forEach(function (e) {
+        var id = 'p-' + (n++);
+        var item = document.createElement('li');
+
+        var btn = document.createElement('button');
+        btn.className = 'item';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-controls', id);
+        btn.textContent = e.title;
+        item.appendChild(btn);
+
+        var detail = document.createElement('div');
+        detail.className = 'detail';
+        detail.id = id;
+
+        var h3 = document.createElement('h3');
+        h3.textContent = e.title;
+        detail.appendChild(h3);
+
+        if (e.when) {
+          var where = document.createElement('p');
+          where.className = 'where';
+          where.textContent = e.when;
+          detail.appendChild(where);
+        }
+
+        (e.body || []).forEach(function (part) {
+          if (typeof part === 'string') {
+            var p = document.createElement('p');
+            p.textContent = part;
+            detail.appendChild(p);
+          } else {
+            var fig = document.createElement('figure');
+            if (part.img) {
+              var img = document.createElement('img');
+              img.src = part.img;
+              img.alt = part.alt || '';
+              img.loading = 'lazy';
+              fig.appendChild(img);
+            } else {
+              var box = document.createElement('div');
+              box.className = 'ph-box';
+              box.textContent = 'Picture placeholder';
+              fig.appendChild(box);
+            }
+            if (part.caption) {
+              var cap = document.createElement('figcaption');
+              cap.textContent = part.caption;
+              fig.appendChild(cap);
+            }
+            detail.appendChild(fig);
+          }
+        });
+
+        item.appendChild(detail);
+        ul.appendChild(item);
+      });
+
+      li.appendChild(ul);
       list.appendChild(li);
     });
   })();
 </script>
+<script src="site.js"></script>
 </body>
 </html>

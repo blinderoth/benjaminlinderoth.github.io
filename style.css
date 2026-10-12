@@ -231,3 +231,18 @@ footer a.personal {
 @media (hover: none), (pointer: coarse) {
   .ring { display: none; }
 }
+
+/* Pictures inside entry text (Personal timeline) */
+.pane figure, .detail figure { margin: 1.25rem 0; }
+.pane figure img, .detail figure img { display: block; max-width: 100%; height: auto; }
+.pane figcaption, .detail figcaption {
+  margin-top: 0.4rem;
+  font-family: var(--sans); font-size: 0.85rem; color: var(--muted);
+}
+.ph-box {
+  display: grid; place-items: center;
+  aspect-ratio: 3 / 2; width: 100%;
+  border: 1px dashed var(--muted);
+  font-family: var(--sans); font-size: 0.9rem; color: var(--muted);
+}
+.personal-page .intro { max-width: 38rem; margin: 0 0 2.5rem; }
