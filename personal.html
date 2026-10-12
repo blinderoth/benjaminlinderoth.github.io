@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal | Benjamin Linderoth</title>
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body data-page="personal" class="personal-page">
+<div class="ring" aria-hidden="true"><i></i></div>
+
+<header>
+  <div class="wrap">
+    <a href="index.html">Benjamin Linderoth</a>
+    <nav aria-label="Main">
+      <a href="index.html">Back to the main site</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <h1 class="name" aria-label="You found it." data-split>
+        <span class="line">You found</span>
+        <span class="line">it.</span>
+      </h1>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap">
+      <h2>Personal</h2>
+      <div>
+        <div class="prose">
+          <p>The part that is not on the CV: book reviews, writing, travel notes and videos.</p>
+        </div>
+        <p class="empty" id="empty">Nothing here yet.</p>
+        <ul class="entries" id="entries"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="links">
+      <a href="index.html">Back to the main site</a>
+    </div>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+<script>
+  /* ---------------------------------------------------------------
+     PERSONAL ENTRIES
+     Add entries between the brackets, one per line:
+       { kind: "Book review", title: "Title", note: "One sentence.", url: "" },
+     "url" is optional. Leave it as "" if there is no link.
+     --------------------------------------------------------------- */
+  var ENTRIES = [
+  ];
+
+  (function () {
+    var list = document.getElementById('entries');
+    var empty = document.getElementById('empty');
+    if (!ENTRIES.length) return;
+    empty.hidden = true;
+    ENTRIES.forEach(function (e) {
+      var li = document.createElement('li');
+
+      var kind = document.createElement('span');
+      kind.className = 'kind';
+      kind.textContent = e.kind || '';
+      li.appendChild(kind);
+
+      var title;
+      if (e.url) {
+        title = document.createElement('a');
+        title.href = e.url;
+        title.rel = 'noopener';
+      } else {
+        title = document.createElement('span');
+      }
+      title.className = 'entry-title';
+      title.textContent = e.title || '';
+      li.appendChild(title);
+
+      if (e.note) {
+        var note = document.createElement('span');
+        note.className = 'entry-note';
+        note.textContent = e.note;
+        li.appendChild(note);
+      }
+      list.appendChild(li);
+    });
+  })();
+</script>
+</body>
+</html>
