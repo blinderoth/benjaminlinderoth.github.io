@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benjamin Linderoth</title>
+<meta name="description" content="Benjamin Linderoth. Business Administration graduate working with processes, costing and automation.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #EFF1F3;
+    --ink: #1C2230;
+    --muted: #5B6577;
+    --accent: #2F45E0;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 5vw, 3rem);
+  }
+
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  a:hover { color: var(--accent); }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .skip {
+    position: absolute; left: -999px; top: 0;
+    background: var(--ink); color: var(--paper);
+    padding: 0.6rem 1rem; font-family: var(--sans); font-size: 0.9rem;
+  }
+  .skip:focus { left: 1rem; top: 1rem; z-index: 10; }
+
+  /* Header */
+  header .wrap {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 1.75rem; padding-bottom: 1.75rem;
+    font-family: var(--sans); font-size: 0.95rem;
+  }
+  header nav { display: flex; gap: clamp(1rem, 3vw, 1.75rem); }
+  header a { text-decoration: none; }
+  header a.quiet { color: var(--muted); }
+  header a:hover { color: var(--accent); }
+
+  /* Hero */
+  .hero { padding: clamp(4rem, 12vw, 9rem) 0 clamp(3rem, 8vw, 6rem); }
+  .name {
+    margin: 0;
+    font-weight: 380;
+    font-size: clamp(3.4rem, 12vw, 9rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+  .name .line { display: block; white-space: nowrap; }
+  .name .ch {
+    display: inline-block;
+    --t: 0;
+    translate: 0 calc(var(--t) * -0.1em);
+    color: color-mix(in srgb, var(--accent) calc(var(--t) * 100%), var(--ink));
+    animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 45ms + 150ms);
+    transition: translate 0.25s ease-out, color 0.25s ease-out;
+  }
+  @keyframes rise {
+    from { transform: translateY(0.35em); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+
+  .lede {
+    margin: clamp(2rem, 5vw, 3.5rem) 0 0;
+    max-width: 34rem;
+    font-size: clamp(1.4rem, 3vw, 1.75rem);
+    line-height: 1.35;
+  }
+  .sub {
+    margin: 1.25rem 0 0;
+    max-width: 34rem;
+    color: var(--muted);
+  }
+
+  /* Sections */
+  .sec { padding: clamp(3.5rem, 8vw, 6.5rem) 0; }
+  .sec .wrap {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: 2rem;
+  }
+  .sec h2 {
+    margin: 0.35rem 0 0;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+  @media (max-width: 720px) {
+    .sec .wrap { grid-template-columns: 1fr; gap: 1.25rem; }
+  }
+
+  /* Work */
+  .project { margin: 0 0 3.5rem; max-width: 38rem; }
+  .project:last-child { margin-bottom: 0; }
+  .project h3 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 450;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .project .where {
+    margin: 0.4rem 0 0.9rem;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .project p { margin: 0 0 0.8rem; }
+
+  /* About / contact */
+  .prose { max-width: 38rem; }
+  .prose p { margin: 0 0 1.1rem; }
+  .contact-list { list-style: none; margin: 1.5rem 0 0; padding: 0; font-size: 1.3rem; }
+  .contact-list li { margin: 0 0 0.35rem; }
+
+  /* Notebook: quieter on purpose */
+  .notebook { border-top: 1px solid #CBD1DA; }
+  .notebook .prose { font-size: 1.05rem; color: var(--muted); }
+  .notebook ul { list-style: none; margin: 1.5rem 0 0; padding: 0; }
+  .notebook li { margin: 0 0 1.4rem; }
+  .notebook .kind { display: block; font-family: var(--sans); font-size: 0.85rem; }
+  .notebook .entry-title { color: var(--ink); font-size: 1.2rem; }
+  .notebook .entry-note { display: block; margin-top: 0.15rem; }
+
+  footer { padding: 2rem 0 3rem; font-family: var(--sans); font-size: 0.85rem; color: var(--muted); }
+
+  /* Cursor ring */
+  .ring {
+    position: fixed; left: 0; top: 0;
+    width: 30px; height: 30px; margin: -15px 0 0 -15px;
+    pointer-events: none; z-index: 20;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .ring.on { opacity: 1; }
+  .ring i {
+    display: block; width: 100%; height: 100%;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1), background-color 0.25s;
+  }
+  .ring.link i { transform: scale(1.7); background: rgba(47, 69, 224, 0.1); }
+  .ring.down i { transform: scale(0.8); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .name .ch { animation: none; transition: none; }
+    .ring { display: none; }
+  }
+  @media (hover: none), (pointer: coarse) {
+    .ring { display: none; }
+  }
+</style>
+</head>
+
+<body>
+<a class="skip" href="#work">Skip to content</a>
+<div class="ring" aria-hidden="true"><i></i></div>
+
+<header>
+  <div class="wrap">
+    <a href="#top">Benjamin Linderoth</a>
+    <nav aria-label="Main">
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a href="#notebook" class="quiet">Notebook</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <h1 class="name" aria-label="Benjamin Linderoth" data-split>
+        <span class="line">Benjamin</span>
+        <span class="line">Linderoth</span>
+      </h1>
+      <p class="lede">I like fixing what slows a process down.</p>
+      <p class="sub">Business Administration graduate from Lund University, looking for roles in business controlling, process development and operational management.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="work">
+    <div class="wrap">
+      <h2>Work</h2>
+      <div>
+        <article class="project">
+          <h3>Automating a quality workflow</h3>
+          <p class="where">Tetra Pak, Supply Network Quality</p>
+          <p>One step in the quality workflow was manual and kept producing input errors. On my own initiative I built a script in Python and SAP GUI that removed it.</p>
+          <p>I tested it through several iterations before my colleagues started using it daily. It saves about 40 minutes a day, an estimated SEK 80,000 a year.</p>
+        </article>
+
+        <article class="project">
+          <h3>A KPI meant to change behavior</h3>
+          <p class="where">Tetra Pak, Supply Network Quality</p>
+          <!-- TODO: Your CVs disagree on this one. LinkedIn and most CVs say "proposed"; one says "implemented". Kept as "proposed". Change if wrong. -->
+          <p>I mapped the process flow and proposed a new KPI for operators, grounded in behavioral economics. The goal was to raise quality awareness rather than just track a metric.</p>
+          <p>The thinking owes a lot to <em>Nudge</em> by Thaler and Sunstein.</p>
+        </article>
+
+        <article class="project">
+          <h3>Costing a Formula Student car</h3>
+          <p class="where">Lund Formula Student, Cost &amp; Manufacturing Lead</p>
+          <p>In a team of three, I was mainly responsible for the financial cost models of the 2025 car: 10 sub-assemblies, 460 process steps and 27 manufacturing types.</p>
+          <p>The team's Cost &amp; Manufacturing score rose 20% from the year before. We ranked 10 of 44 at Formula Student Netherlands and 11 of 53 at Formula Student Czech.</p>
+        </article>
+
+        <article class="project">
+          <h3>Running a student union's treasury</h3>
+          <p class="where">LundaEkonomerna, Treasury Project Leader</p>
+          <p>I led a team of five handling daily finances, budget tracking and internal controls in Fortnox, for a student union with SEK 10 million in annual revenue.</p>
+          <p>I also started moving the internal documents from Swedish to English, to open the committee to international students.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="about">
+    <div class="wrap">
+      <h2>About</h2>
+      <div class="prose">
+        <p>Before university I worked full-time in Tetra Pak's warehouse. I kept working there part-time during my studies, then moved into analytical roles in the supply network. That is where I learned how quickly a small bottleneck turns into a costly problem.</p>
+        <p>I approach business with a technical interest and an economic perspective. I studied Business Administration with an International Business focus at Lund University, and spent an exchange semester at the National University of Singapore on data-driven decision-making and business analytics.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="contact">
+    <div class="wrap">
+      <h2>Contact</h2>
+      <div class="prose">
+        <p>If you have a role or a problem that fits, write to me.</p>
+        <ul class="contact-list">
+          <li><a href="mailto:benjamin.linderoth@gmail.com">benjamin.linderoth@gmail.com</a></li>
+          <!-- TODO: Your LinkedIn export says /in/benjaminlinderoth, your CVs say /in/benjamin-linderoth. Check which one works. -->
+          <li><a href="https://www.linkedin.com/in/benjaminlinderoth" rel="noopener">LinkedIn</a></li>
+          <!-- TODO: Put your CV PDF in the same folder and name it cv.pdf. -->
+          <li><a href="cv.pdf">CV (PDF)</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec notebook" id="notebook">
+    <div class="wrap">
+      <h2>Notebook</h2>
+      <div class="prose">
+        <p>Outside the CV: book reviews, writing, travel notes and videos.</p>
+        <p id="notebook-empty">Nothing here yet.</p>
+        <ul id="notebook-list"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">&copy; Benjamin Linderoth</div>
+</footer>
+
+<script>
+  /* ---------------------------------------------------------------
+     NOTEBOOK ENTRIES
+     Add entries here. Each one is a line between the brackets:
+       { kind: "Book review", title: "Title", note: "One sentence.", url: "" },
+     "url" is optional. Leave it as "" if there is no link.
+     --------------------------------------------------------------- */
+  const NOTEBOOK = [
+  ];
+
+  (function renderNotebook() {
+    const list = document.getElementById('notebook-list');
+    const empty = document.getElementById('notebook-empty');
+    if (!NOTEBOOK.length) return;
+    empty.hidden = true;
+    NOTEBOOK.forEach(function (e) {
+      const li = document.createElement('li');
+      const kind = document.createElement('span');
+      kind.className = 'kind';
+      kind.textContent = e.kind || '';
+      li.appendChild(kind);
+
+      let title;
+      if (e.url) {
+        title = document.createElement('a');
+        title.href = e.url;
+        title.rel = 'noopener';
+      } else {
+        title = document.createElement('span');
+      }
+      title.className = 'entry-title';
+      title.textContent = e.title || '';
+      li.appendChild(title);
+
+      if (e.note) {
+        const note = document.createElement('span');
+        note.className = 'entry-note';
+        note.textContent = e.note;
+        li.appendChild(note);
+      }
+      list.appendChild(li);
+    });
+  })();
+
+  /* Split the name into letters so each one can react to the cursor. */
+  (function splitName() {
+    const lines = document.querySelectorAll('[data-split] .line');
+    let i = 0;
+    lines.forEach(function (line) {
+      const text = line.textContent;
+      line.textContent = '';
+      line.setAttribute('aria-hidden', 'true');
+      Array.from(text).forEach(function (c) {
+        const s = document.createElement('span');
+        s.className = 'ch';
+        s.style.setProperty('--i', i++);
+        s.textContent = c;
+        line.appendChild(s);
+      });
+    });
+  })();
+
+  /* Cursor effects: only on devices with a real pointer, and not for reduced motion. */
+  (function cursor() {
+    const ok = window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+               !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!ok) return;
+
+    const ring = document.querySelector('.ring');
+    const letters = Array.from(document.querySelectorAll('.name .ch'));
+    let x = -100, y = -100, rx = -100, ry = -100, started = false;
+
+    window.addEventListener('pointermove', function (e) {
+      x = e.clientX; y = e.clientY;
+      if (!started) { rx = x; ry = y; started = true; ring.classList.add('on'); }
+
+      letters.forEach(function (el) {
+        const r = el.getBoundingClientRect();
+        const d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+        const t = Math.max(0, 1 - d / 170);
+        el.style.setProperty('--t', t.toFixed(3));
+      });
+    });
+
+    document.addEventListener('pointerleave', function () {
+      ring.classList.remove('on');
+      started = false;
+      letters.forEach(function (el) { el.style.setProperty('--t', 0); });
+    });
+
+    document.addEventListener('pointerover', function (e) {
+      ring.classList.toggle('link', !!e.target.closest('a, button'));
+    });
+    document.addEventListener('pointerdown', function () { ring.classList.add('down'); });
+    document.addEventListener('pointerup', function () { ring.classList.remove('down'); });
+
+    (function loop() {
+      rx += (x - rx) * 0.18;
+      ry += (y - ry) * 0.18;
+      ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)';
+      requestAnimationFrame(loop);
+    })();
+  })();
+</script>
+</body>
+</html>
