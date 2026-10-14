@@ -268,13 +268,48 @@ footer a.personal {
 }
 .personal-page .intro { max-width: 38rem; margin: 0 0 2.5rem; }
 
-/* Duration lines beside the Projects and Experience timelines */
-.tl-wrap { position: relative; }
-.dur-layer { position: absolute; left: 0; top: 0; }
-.dur {
-  position: absolute; width: 2px; border-radius: 1px;
-  background: var(--dur);
-  transition: background-color 0.2s;
+/* Projects and Experience timelines (inside .tl-wrap; the Personal page is not affected) */
+.tl-wrap { position: relative; padding-left: 22px; }
+.tl-wrap .tl-year { transition: margin-bottom 0.5s ease; }
+.tl.scaled .tl-year:not(.extra) { min-height: 8rem; }
+.tl-wrap .tl-year.end::after { display: none; }
+
+/* Years that only appear when a selected duration needs them */
+.tl-wrap .tl-year.extra {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-bottom: 0;
+  transition: grid-template-rows 0.5s ease, opacity 0.4s ease, margin-bottom 0.5s ease;
 }
-.dur.hl, .dur.active { background: var(--accent); }
-.tl.scaled .tl-year { min-height: 8rem; }
+.tl-wrap .tl-year.extra.shown {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-bottom: var(--gap);
+}
+.tl-inner { min-height: 0; overflow: hidden; }
+.tl-spacer { height: 6rem; }
+
+/* The duration line: drawn from the end date down to the start date */
+.dur {
+  position: absolute; left: 3px; width: 8px; top: 0; height: 0;
+  pointer-events: none;
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.2s ease;
+}
+.dur.grow { opacity: 1; clip-path: inset(0 0 0 0); }
+.dur::before {
+  content: ""; position: absolute; left: 3px; top: 3px; bottom: 3px;
+  width: 2px; border-radius: 1px; background: var(--dur);
+}
+.dur .cap {
+  position: absolute; left: 1px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--dur);
+}
+.dur .cap.top { top: 0; }
+.dur .cap.bottom { bottom: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tl-wrap .tl-year, .tl-wrap .tl-year.extra, .dur { transition: none; }
+}

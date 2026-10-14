@@ -19,6 +19,175 @@
     });
   });
 
+  /* ---------- Timelines with duration lines (Projects, Experience) ----------
+     Titles sit under the year they ended. Each title carries
+       data-start="YYYY-MM"  data-end="YYYY-MM" or "present".
+     Selecting a title reveals any years its duration needs, then draws
+     a slim line from the end date down to the start date. */
+  function monthOf(str, nowM) {
+    if (str === 'present') return nowM;
+    var p = str.split('-');
+    return (+p[0]) * 12 + (+p[1]) - 1;
+  }
+
+  var REVEAL_MS = reduceMotion ? 0 : 520;
+
+  function Timeline(wrap) {
+    var tl = wrap.querySelector('.tl');
+    var now = new Date();
+    var nowM = now.getFullYear() * 12 + now.getMonth();
+    var info = {};
+    var minY = Infinity, maxY = -Infinity;
+
+    tl.querySelectorAll('.item[data-start]').forEach(function (b) {
+      var s = monthOf(b.getAttribute('data-start'), nowM);
+      var e = monthOf(b.getAttribute('data-end'), nowM) + 1;
+      info[b.getAttribute('aria-controls')] = { s: s, e: e };
+      minY = Math.min(minY, Math.floor(s / 12));
+      maxY = Math.max(maxY, Math.floor((e - 1) / 12));
+    });
+
+    /* Add a hidden row for every year that has no titles of its own. */
+    var have = {};
+    Array.from(tl.children).forEach(function (li) { have[+li.getAttribute('data-year')] = li; });
+    var rows = [];
+    for (var Y = maxY; Y >= minY; Y--) {
+      var li = have[Y];
+      if (!li) {
+        li = document.createElement('li');
+        li.className = 'tl-year extra';
+        li.setAttribute('data-year', Y);
+        li.setAttribute('aria-hidden', 'true');
+        var inner = document.createElement('div');
+        inner.className = 'tl-inner';
+        var label = document.createElement('p');
+        label.className = 'tl-label';
+        label.textContent = Y;
+        var spacer = document.createElement('div');
+        spacer.className = 'tl-spacer';
+        inner.appendChild(label);
+        inner.appendChild(spacer);
+        li.appendChild(inner);
+      }
+      tl.appendChild(li); /* keeps rows in order, newest first */
+      rows.push({ y: Y, li: li, extra: li.classList.contains('extra') });
+    }
+
+    var line = document.createElement('div');
+    line.className = 'dur';
+    line.setAttribute('aria-hidden', 'true');
+    line.innerHTML = '<i class="cap top"></i><i class="cap bottom"></i>';
+    wrap.appendChild(line);
+
+    var current = null, token = 0;
+
+    function visibleRows() {
+      return rows.filter(function (r) { return !r.extra || r.li.classList.contains('shown'); });
+    }
+
+    /* Dashed line wherever years are skipped; no line below the last visible year. */
+    function updateJumps() {
+      var vis = visibleRows();
+      rows.forEach(function (r) { r.li.classList.remove('jump', 'end'); });
+      vis.forEach(function (r, i) {
+        var nx = vis[i + 1];
+        if (nx && nx.y < r.y - 1) r.li.classList.add('jump');
+        if (!nx) r.li.classList.add('end');
+      });
+    }
+
+    /* Page position of any month, based on the visible year rows. */
+    function yAt(t) {
+      var base = wrap.getBoundingClientRect().top;
+      var vis = visibleRows().map(function (r) {
+        var b = r.li.getBoundingClientRect();
+        return { y: r.y, top: b.top - base, bottom: b.bottom - base };
+      });
+      var B = {};
+      vis.forEach(function (r, i) {
+        var nx = vis[i + 1];
+        if (B[r.y + 1] === undefined) B[r.y + 1] = r.top;
+        var bot = (nx && nx.y === r.y - 1) ? nx.top : r.bottom;
+        B[r.y] = bot;
+        if (nx && nx.y < r.y - 1) {
+          for (var k = r.y - 1; k > nx.y; k--) {
+            B[k] = bot + (nx.top - bot) * (r.y - k) / (r.y - (nx.y + 1));
+          }
+        }
+      });
+      var hi = vis[0].y, lo = vis[vis.length - 1].y;
+      var Yr = Math.floor(t / 12);
+      if (Yr > hi) return B[hi + 1];
+      if (Yr < lo) return B[lo];
+      return B[Yr] + (B[Yr + 1] - B[Yr]) * ((t - Yr * 12) / 12);
+    }
+
+    function place(it, animate) {
+      var top = yAt(it.e), bottom = yAt(it.s);
+      line.classList.remove('grow');
+      line.style.transition = 'none';
+      line.style.top = top + 'px';
+      line.style.height = Math.max(6, bottom - top) + 'px';
+      void line.offsetWidth;
+      if (animate) line.style.transition = '';
+      line.classList.add('grow');
+      if (!animate) { void line.offsetWidth; line.style.transition = ''; }
+    }
+
+    this.select = function (id) {
+      if (id && id === current) return;
+      var my = ++token;
+      var hadLine = line.classList.contains('grow');
+      line.classList.remove('grow');
+      current = id || null;
+
+      var it = id ? info[id] : null;
+      var need = {};
+      if (it) {
+        for (var y = Math.floor(it.s / 12); y <= Math.floor((it.e - 1) / 12); y++) need[y] = true;
+      }
+      var changed = false;
+      rows.forEach(function (r) {
+        if (!r.extra) return;
+        var on = !!need[r.y];
+        if (r.li.classList.contains('shown') !== on) {
+          r.li.classList.toggle('shown', on);
+          changed = true;
+        }
+      });
+      updateJumps();
+      if (!it) return;
+
+      var delay = changed ? REVEAL_MS : (hadLine && !reduceMotion ? 200 : 30);
+      setTimeout(function () {
+        if (my !== token) return;
+        place(it, !reduceMotion);
+      }, delay);
+    };
+
+    this.refresh = function () {
+      if (current && info[current]) place(info[current], false);
+    };
+
+    updateJumps();
+  }
+
+  var timelines = [];
+  document.querySelectorAll('.tl-wrap').forEach(function (wrap) {
+    var t = new Timeline(wrap);
+    t.wrap = wrap;
+    timelines.push(t);
+  });
+  function refreshAll() { timelines.forEach(function (t) { t.refresh(); }); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshAll);
+  var lastW = window.innerWidth, resizeTimer;
+  window.addEventListener('resize', function () {
+    if (window.innerWidth === lastW) return;
+    lastW = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(refreshAll, 150);
+  });
+
   /* ---------- Detail pane: shows the text of whatever title was clicked ---------- */
   function openDetail(group, id, trigger) {
     var pane = group.querySelector('.pane');
@@ -30,13 +199,9 @@
       var li = b.closest('li');
       if (li) li.classList.remove('open');
     });
-    group.querySelectorAll('.dur').forEach(function (d) {
-      d.classList.toggle('active', d.getAttribute('data-id') === id);
-    });
     trigger.setAttribute('aria-expanded', 'true');
     var li = trigger.closest('li');
     if (li) li.classList.add('open');
-    group.setAttribute('data-active', id);
 
     pane.innerHTML = detail.innerHTML;
     pane.classList.remove('swap');
@@ -48,131 +213,21 @@
   document.querySelectorAll('[data-pane-group]').forEach(function (group) {
     group.querySelectorAll('.item').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        if (btn.getAttribute('aria-expanded') === 'true' && !desktop.matches) {
+        var id = btn.getAttribute('aria-controls');
+        var closing = btn.getAttribute('aria-expanded') === 'true' && !desktop.matches;
+        if (closing) {
           btn.setAttribute('aria-expanded', 'false');
           btn.closest('li').classList.remove('open');
-          group.querySelectorAll('.dur').forEach(function (d) { d.classList.remove('active'); });
         } else {
-          openDetail(group, btn.getAttribute('aria-controls'), btn);
+          openDetail(group, id, btn);
         }
-        /* On phones the text opens under the title, so the lines need redrawing. */
-        if (typeof redrawDurations === 'function') requestAnimationFrame(redrawDurations);
+        var myWrap = btn.closest('.tl-wrap');
+        timelines.forEach(function (t) {
+          if (!group.contains(t.wrap)) return;
+          t.select(t.wrap === myWrap && !closing ? id : null);
+        });
       });
     });
-  });
-
-  /* ---------- Duration lines beside the Projects and Experience timelines ----------
-     Each title carries data-start="YYYY-MM" and data-end="YYYY-MM" (or "present").
-     A slim line to the left of the timeline runs from the start month to the end month,
-     and overlapping items get their own line side by side. */
-  var LINE_STEP = 8;
-
-  function monthOf(str, nowM) {
-    if (str === 'present') return nowM;
-    var p = str.split('-');
-    return (+p[0]) * 12 + (+p[1]) - 1;
-  }
-
-  function drawDurations(wrap) {
-    var tl = wrap.querySelector('.tl');
-    var buttons = Array.from(tl.querySelectorAll('.item[data-start]'));
-    var now = new Date();
-    var nowM = now.getFullYear() * 12 + now.getMonth();
-
-    var items = buttons.map(function (b) {
-      return {
-        id: b.getAttribute('aria-controls'),
-        btn: b,
-        s: monthOf(b.getAttribute('data-start'), nowM),
-        e: monthOf(b.getAttribute('data-end'), nowM) + 1
-      };
-    });
-
-    /* Side-by-side lines: each item takes the first free lane. */
-    var laneEnds = [];
-    items.slice().sort(function (a, b) { return a.s - b.s || (b.e - b.s) - (a.e - a.s); })
-      .forEach(function (it) {
-        var l = 0;
-        while (l < laneEnds.length && laneEnds[l] > it.s) l++;
-        it.lane = l;
-        laneEnds[l] = it.e;
-      });
-    var nLanes = Math.max(1, laneEnds.length);
-    var padLeft = nLanes * LINE_STEP + 18;
-    wrap.style.paddingLeft = padLeft + 'px';
-
-    /* Where each year starts and ends on the page.
-       Years without a row (inside a dashed gap) are spread across the gap. */
-    var base = wrap.getBoundingClientRect().top;
-    var rows = Array.from(tl.children).map(function (li) {
-      var r = li.getBoundingClientRect();
-      return { y: +li.getAttribute('data-year'), top: r.top - base, bottom: r.bottom - base };
-    });
-    var B = {};
-    rows.forEach(function (r, i) {
-      var nx = rows[i + 1];
-      if (B[r.y + 1] === undefined) B[r.y + 1] = r.top;
-      var bot = (nx && nx.y === r.y - 1) ? nx.top : r.bottom;
-      B[r.y] = bot;
-      if (nx && nx.y < r.y - 1) {
-        for (var k = r.y - 1; k > nx.y; k--) {
-          B[k] = bot + (nx.top - bot) * (r.y - k) / (r.y - (nx.y + 1));
-        }
-      }
-    });
-    var maxY = rows[0].y, minY = rows[rows.length - 1].y;
-    function yAt(t) {
-      var Y = Math.floor(t / 12);
-      if (Y > maxY) return B[maxY + 1];
-      if (Y < minY) return B[minY];
-      var frac = (t - Y * 12) / 12;
-      return B[Y] + (B[Y + 1] - B[Y]) * frac;
-    }
-
-    var layer = wrap.querySelector('.dur-layer');
-    if (!layer) {
-      layer = document.createElement('div');
-      layer.className = 'dur-layer';
-      layer.setAttribute('aria-hidden', 'true');
-      wrap.insertBefore(layer, wrap.firstChild);
-    }
-    layer.innerHTML = '';
-
-    items.forEach(function (it) {
-      var top = yAt(it.e), bottom = yAt(it.s);
-      var line = document.createElement('div');
-      line.className = 'dur';
-      line.setAttribute('data-id', it.id);
-      line.style.left = (padLeft - 18 - it.lane * LINE_STEP) + 'px';
-      line.style.top = top + 'px';
-      line.style.height = Math.max(3, bottom - top - 2) + 'px';
-      if (it.btn.getAttribute('aria-expanded') === 'true') line.classList.add('active');
-      layer.appendChild(line);
-
-      if (!it.btn.hasAttribute('data-dur-wired')) {
-        it.btn.setAttribute('data-dur-wired', '');
-        it.btn.addEventListener('mouseenter', function () { toggleHl(wrap, it.id, true); });
-        it.btn.addEventListener('mouseleave', function () { toggleHl(wrap, it.id, false); });
-      }
-    });
-  }
-
-  function toggleHl(wrap, id, on) {
-    wrap.querySelectorAll('.dur').forEach(function (d) {
-      if (d.getAttribute('data-id') === id) d.classList.toggle('hl', on);
-    });
-  }
-
-  var durWraps = Array.from(document.querySelectorAll('.tl-wrap'));
-  function redrawDurations() { durWraps.forEach(drawDurations); }
-  redrawDurations();
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(redrawDurations);
-  var lastW = window.innerWidth, resizeTimer;
-  window.addEventListener('resize', function () {
-    if (window.innerWidth === lastW) return;
-    lastW = window.innerWidth;
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(redrawDurations, 150);
   });
 
   /* ---------- Cursor effects: only with a real pointer, and not for reduced motion ---------- */
