@@ -1,10 +1,26 @@
+@font-face {
+  font-family: "Liberation Serif";
+  src: url("fonts/LiberationSerif-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Liberation Mono";
+  src: url("fonts/LiberationMono-Regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Liberation Serif";
+  src: url("fonts/LiberationSerif-Italic.woff2") format("woff2");
+  font-weight: 400; font-style: italic; font-display: swap;
+}
+
 :root {
   --paper: #EFF1F3;
   --ink: #1C2230;
   --muted: #5B6577;
   --accent: #2F45E0;
   --rule: #CBD1DA;
-  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --serif: "Liberation Serif", "Times New Roman", Times, serif;
   --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
@@ -55,7 +71,7 @@ header a:hover { color: var(--accent); }
 .hero { padding: clamp(4rem, 12vw, 9rem) 0 clamp(2.5rem, 7vw, 5rem); }
 .name {
   margin: 0;
-  font-weight: 380;
+  font-weight: 400;
   font-size: clamp(3.4rem, 12vw, 9rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
@@ -128,7 +144,7 @@ header a:hover { color: var(--accent); }
 .pane-empty { margin: 0; font-family: var(--sans); font-size: 0.95rem; color: var(--muted); }
 .pane.swap > * { animation: fadein 0.35s ease-out both; }
 @keyframes fadein { from { opacity: 0; translate: 0 0.4rem; } to { opacity: 1; translate: 0 0; } }
-.pane h3 { margin: 0; font-size: 1.75rem; font-weight: 450; line-height: 1.2; letter-spacing: -0.01em; }
+.pane h3 { margin: 0; font-size: 1.75rem; font-weight: 400; line-height: 1.2; letter-spacing: -0.01em; }
 .where { margin: 0.4rem 0 1rem; font-family: var(--sans); font-size: 0.9rem; color: var(--muted); }
 .pane p, .detail p { margin: 0 0 0.8rem; }
 
@@ -180,9 +196,23 @@ footer a.personal {
   text-underline-offset: 0.25em;
 }
 
-/* Personal page */
+/* Personal page: inverted colors and a monospaced font */
+.personal-page {
+  --paper: #161B26;
+  --ink: #E8EBF0;
+  --muted: #98A2B3;
+  --accent: #8E9CFF;
+  --rule: #343C4C;
+  --serif: "Liberation Mono", "Courier New", monospace;
+  --sans: "Liberation Mono", "Courier New", monospace;
+  color-scheme: dark;
+  font-size: 1rem;
+}
+.personal-page .ring.link i { background: rgba(142, 156, 255, 0.15); }
+.personal-page .item { font-size: 1.1rem; }
+.personal-page .pane h3 { font-size: 1.4rem; letter-spacing: 0; }
 .personal-page .hero { padding-bottom: 2rem; }
-.personal-page .name { font-size: clamp(3rem, 10vw, 7rem); }
+.personal-page .name { font-size: clamp(2.6rem, 9vw, 6rem); letter-spacing: -0.02em; }
 .entries { list-style: none; margin: 2rem 0 0; padding: 0; max-width: 38rem; }
 .entries li { margin: 0 0 1.6rem; }
 .entries .kind { display: block; font-family: var(--sans); font-size: 0.85rem; color: var(--muted); }
@@ -246,3 +276,47 @@ footer a.personal {
   font-family: var(--sans); font-size: 0.9rem; color: var(--muted);
 }
 .personal-page .intro { max-width: 38rem; margin: 0 0 2.5rem; }
+
+/* Duration charts (Projects, Experience) */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem;
+  list-style: none; margin: 0 0 1.75rem; padding: 0;
+  font-family: var(--sans); font-size: 0.85rem; color: var(--muted);
+}
+.legend li { display: flex; align-items: center; gap: 0.45rem; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.k-work, .k-professional { background: var(--ink); }
+.k-study { background: var(--accent); }
+.k-student { background: #8E98AA; }
+
+.panes.has-chart { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); }
+.chart { position: relative; }
+.chart svg { position: absolute; left: 0; top: 0; width: 100%; overflow: visible; pointer-events: none; }
+.chart .axis { stroke: var(--rule); stroke-width: 1; }
+.chart .axis.gap { stroke-dasharray: 3 4; stroke: var(--muted); }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .lead { stroke: var(--rule); stroke-width: 1; transition: stroke 0.2s; }
+.chart .lead.hl { stroke: var(--accent); }
+.chart .yr {
+  position: absolute; left: 0;
+  font-family: var(--sans); font-size: 0.8rem; line-height: 1; color: var(--muted);
+}
+.chart .bar {
+  position: absolute; width: 12px; border-radius: 3px; cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.chart .bar.hl, .chart .bar.active { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--accent); }
+.chart .clabel {
+  position: absolute;
+  background: none; border: 0; padding: 0;
+  font: inherit; font-size: 1.05rem; line-height: 1.25;
+  color: var(--ink); text-align: left; cursor: pointer;
+  transition: color 0.2s;
+}
+.chart .clabel:hover, .chart .clabel.hl, .chart .clabel[aria-expanded="true"] { color: var(--accent); }
+
+@media (max-width: 800px) {
+  .panes.has-chart { grid-template-columns: minmax(0, 1fr); }
+  .panes.has-chart .pane { display: block; position: static; margin-top: 2rem; min-height: 0; }
+  .chart .clabel { font-size: 1rem; }
+}
