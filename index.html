@@ -72,9 +72,34 @@
                   <div class="detail" id="d-automation">
                     <h3>Automating a quality workflow</h3>
                     <p class="where">Tetra Pak, Supply Network Quality, Jun to Sep 2026</p>
-                    <p>One step in the quality workflow was manual and kept producing input errors. On my own initiative I built a script in Python and SAP GUI that removed it.</p>
-                    <p>I tested it through several iterations before my colleagues started using it daily. It saves about 40 minutes a day, an estimated SEK 80,000 a year.</p>
-                  </div>
+                    <p>Managing a quality deviation required jumping through five SAP transactions and repeatedly re-entering part numbers. On my own initiative, I built a script in Python and SAP GUI that unified the entire process into a single prompt.</p>
+
+                    <div class="process-compare">
+                      <div class="process-col before">
+                        <p class="process-tag">Before: 5 SAP transactions (Manual)</p>
+                        <ol class="process-steps">
+                          <li><span class="step-num">1</span><span><strong>MM03:</strong> Set Quality Management to Inspection Lot</span></li>
+                          <li><span class="step-num">2</span><span><strong>QDL2:</strong> Create Quality Inspection Type</span></li>
+                          <li><span class="step-num">3</span><span><strong>YMMI1PSC:</strong> Retrieve supplier number</span></li>
+                          <li><span class="step-num">4</span><span><strong>YQDQL:</strong> Set inspection entry for stock arrival</span></li>
+                          <li><span class="step-num">5</span><span><strong>MD04:</strong> Record reason for quality change</span></li>
+                        </ol>
+                        <p class="process-meta">Repetitive input • Prone to transcription errors</p>
+                      </div>
+
+                      <div class="process-col after">
+                        <p class="process-tag">After: Python &amp; SAP GUI Automation</p>
+                        <ol class="process-steps">
+                          <li><span class="step-num">1</span><span><strong>Operator UI:</strong> Enter part number &amp; deviation reason</span></li>
+                          <li><span class="auto">Auto</span><span>Script fetches supplier and populates MM03, QDL2 &amp; YQDQL</span></li>
+                          <li><span class="auto">Auto</span><span>Updates MD04 logs and confirms completed procedure</span></li>
+                        </ol>
+                        <p class="process-meta">Single prompt • Zero transcription errors • 40 min saved/day</p>
+                      </div>
+                    </div>
+
+                      <p>I tested it through several iterations before colleagues began using it daily. It saves roughly 40 minutes a day—an estimated SEK 80,000 annually.</p>
+                    </div>
                 </li>
                 <li>
                   <button class="item" aria-expanded="false" aria-controls="d-kpi" data-start="2026-06" data-end="2026-09">A KPI meant to change behavior</button>
