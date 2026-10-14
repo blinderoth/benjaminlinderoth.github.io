@@ -72,34 +72,145 @@
                   <div class="detail" id="d-automation">
                     <h3>Automating a quality workflow</h3>
                     <p class="where">Tetra Pak, Supply Network Quality, Jun to Sep 2026</p>
-                    <p>Managing a quality deviation required jumping through five SAP transactions and repeatedly re-entering part numbers. On my own initiative, I built a script in Python and SAP GUI that unified the entire process into a single prompt.</p>
+                    <p>Managing a quality deviation required jumping through five SAP transactions and repeatedly re-entering part and supplier numbers. On my own initiative, I built a script in Python and SAP GUI that unified the procedure into a single prompt.</p>
 
-                    <div class="process-compare">
-                      <div class="process-col before">
-                        <p class="process-tag">Before: 5 SAP transactions (Manual)</p>
-                        <ol class="process-steps">
-                          <li><span class="step-num">1</span><span><strong>MM03:</strong> Set Quality Management to Inspection Lot</span></li>
-                          <li><span class="step-num">2</span><span><strong>QDL2:</strong> Create Quality Inspection Type</span></li>
-                          <li><span class="step-num">3</span><span><strong>YMMI1PSC:</strong> Retrieve supplier number</span></li>
-                          <li><span class="step-num">4</span><span><strong>YQDQL:</strong> Set inspection entry for stock arrival</span></li>
-                          <li><span class="step-num">5</span><span><strong>MD04:</strong> Record reason for quality change</span></li>
-                        </ol>
-                        <p class="process-meta">Repetitive input • Prone to transcription errors</p>
+                    <!-- Interactive ISO Flowchart -->
+                    <div class="fc-widget" data-flowchart>
+                      <div class="fc-bar">
+                        <div class="fc-tabs" role="tablist" aria-label="Process mode">
+                          <button type="button" class="fc-tab active" role="tab" aria-selected="true" data-fc-mode="manual">Manual (5 screens)</button>
+                          <button type="button" class="fc-tab" role="tab" aria-selected="false" data-fc-mode="auto">Automated (Script)</button>
+                        </div>
+                        <button type="button" class="fc-run" data-fc-run title="Simulate execution flow">
+                          <span class="fc-run-dot"></span> <span class="fc-run-label">Run trace</span>
+                        </button>
                       </div>
 
-                      <div class="process-col after">
-                        <p class="process-tag">After: Python &amp; SAP GUI Automation</p>
-                        <ol class="process-steps">
-                          <li><span class="step-num">1</span><span><strong>Operator UI:</strong> Enter part number &amp; deviation reason</span></li>
-                          <li><span class="auto">Auto</span><span>Script fetches supplier and populates MM03, QDL2 &amp; YQDQL</span></li>
-                          <li><span class="auto">Auto</span><span>Updates MD04 logs and confirms completed procedure</span></li>
-                        </ol>
-                        <p class="process-meta">Single prompt • Zero transcription errors • 40 min saved/day</p>
+                      <div class="fc-legend" aria-hidden="true">
+                        <span><i class="lg-term"></i> Start / End</span>
+                        <span><i class="lg-io"></i> Manual Input</span>
+                        <span><i class="lg-proc"></i> SAP Process</span>
+                        <span><i class="lg-sub"></i> Script Subroutine</span>
+                      </div>
+
+                      <div class="fc-stage">
+                        <!-- MANUAL FLOW -->
+                        <div class="fc-track active" data-fc-panel="manual">
+                          <div class="fc-node fc-term" style="--step:0">
+                            <span class="fc-title">Quality issue identified</span>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-io" style="--step:1">
+                            <div class="fc-skew">
+                              <span class="fc-code">Input 1</span>
+                              <span class="fc-title">Open MM03 &amp; enter part #</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-proc" style="--step:2">
+                            <span class="fc-code">MM03</span>
+                            <span class="fc-title">Set QM to Inspection Lot</span>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-io" style="--step:3">
+                            <div class="fc-skew">
+                              <span class="fc-code">Input 2</span>
+                              <span class="fc-title">Open QDL2 &amp; re-enter part #</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-proc" style="--step:4">
+                            <span class="fc-code">QDL2</span>
+                            <span class="fc-title">Create Quality Inspection Type</span>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-io" style="--step:5">
+                            <div class="fc-skew">
+                              <span class="fc-code">Input 3 &bull; Lookup</span>
+                              <span class="fc-title">Open YMMI1PSC, enter part # &amp; note down supplier #</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-io" style="--step:6">
+                            <div class="fc-skew">
+                              <span class="fc-code">Input 4</span>
+                              <span class="fc-title">Open YQDQL &amp; transcribe supplier #</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-proc" style="--step:7">
+                            <span class="fc-code">YQDQL</span>
+                            <span class="fc-title">Create inspection entry for stock arrival</span>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-io" style="--step:8">
+                            <div class="fc-skew">
+                              <span class="fc-code">Input 5</span>
+                              <span class="fc-title">Open MD04, re-enter part # &amp; type reason</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-proc" style="--step:9">
+                            <span class="fc-code">MD04</span>
+                            <span class="fc-title">Record reason for QM change</span>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-term" style="--step:10">
+                            <span class="fc-title">Procedure completed</span>
+                          </div>
+
+                          <p class="fc-summary">5 manual inputs &bull; 5 SAP screens &bull; High risk of transcription typos</p>
+                        </div>
+
+                        <!-- AUTOMATED FLOW -->
+                        <div class="fc-track" data-fc-panel="auto">
+                          <div class="fc-node fc-term" style="--step:0">
+                            <span class="fc-title">Quality issue identified</span>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-io fc-accent" style="--step:1">
+                            <div class="fc-skew">
+                              <span class="fc-code">Single Prompt &bull; Python UI</span>
+                              <span class="fc-title">Enter part # &amp; reason for QM change</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-sub" style="--step:2">
+                            <span class="fc-code">Predefined Subroutine &bull; SAP GUI Script</span>
+                            <span class="fc-title">Automated Background Execution</span>
+                            <div class="fc-sub-pipeline">
+                              <span>1. MM03: Set Inspection Lot</span>
+                              <span>2. QDL2: Create Inspection Type</span>
+                              <span>3. YMMI1PSC: Auto-fetch supplier #</span>
+                              <span>4. YQDQL: Log arrival inspection</span>
+                              <span>5. MD04: Write change reason</span>
+                            </div>
+                          </div>
+                          <div class="fc-arrow"></div>
+
+                          <div class="fc-node fc-term fc-accent" style="--step:3">
+                            <span class="fc-title">Procedure completed</span>
+                          </div>
+
+                          <p class="fc-summary fc-summary-accent">1 manual input &bull; Zero transcription errors &bull; Saves ~40 min/day</p>
+                        </div>
                       </div>
                     </div>
 
-                      <p>I tested it through several iterations before colleagues began using it daily. It saves roughly 40 minutes a day—an estimated SEK 80,000 annually.</p>
-                    </div>
+                    <p>I tested it through several iterations before my colleagues started using it daily. It saves about 40 minutes a day, an estimated SEK 80,000 a year.</p>
+                  </div>
                 </li>
                 <li>
                   <button class="item" aria-expanded="false" aria-controls="d-kpi" data-start="2026-06" data-end="2026-09">A KPI meant to change behavior</button>
@@ -168,7 +279,6 @@
                   <div class="detail" id="e-qutip">
                     <h3>QuTI-P &amp; Process Coordinator</h3>
                     <p class="where">Tetra Pak, Lund, Oct 2026 to present, consultant</p>
-                    <!-- TODO: add a sentence about the role when you are ready. -->
                     <p>My current role at Tetra Pak.</p>
                   </div>
                 </li>
@@ -288,7 +398,6 @@
                   <div class="detail" id="e-summer">
                     <h3>Summer Job</h3>
                     <p class="where">Tetra Pak, Lund, Jul to Aug 2020</p>
-                    <!-- TODO: add what you did, if you want to. -->
                     <p>Summer job at Tetra Pak in Lund.</p>
                   </div>
                 </li>
@@ -303,7 +412,6 @@
                   <div class="detail" id="e-reklam">
                     <h3>Reklamutdelare</h3>
                     <p class="where">Svensk Direktreklam AB, Jun 2017 to Jun 2018</p>
-                    <!-- TODO: add a sentence about what you did, if you want one. -->
                     <p>Distributing advertising material.</p>
                   </div>
                 </li>
