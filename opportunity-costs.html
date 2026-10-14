@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opportunity costs made simple | Benjamin Linderoth</title>
+<meta name="description" content="An interactive calculator that shows what money spent today could grow into if it were invested instead.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body data-page="oc">
+<div class="ring" aria-hidden="true"><i></i></div>
+
+<header>
+  <div class="wrap">
+    <a href="index.html">Benjamin Linderoth</a>
+    <nav aria-label="Main">
+      <a href="index.html#opportunity-costs-made-simple">Back to projects</a>
+    </nav>
+  </div>
+</header>
+
+<main class="oc">
+  <section class="oc-hero">
+    <div class="wrap">
+      <h1>Opportunity costs made simple</h1>
+      <p class="oc-lede">Every purchase has two prices: what it costs today, and what that money could have built over time.</p>
+    </div>
+  </section>
+
+  <div class="wrap">
+
+    <!-- Starting scenarios -->
+    <section class="oc-block" aria-labelledby="oc-presets-title">
+      <div class="oc-row-head">
+        <h2 id="oc-presets-title" class="oc-small">Choose a starting point</h2>
+        <span class="oc-badge" id="oc-custom" hidden>Adjusted</span>
+      </div>
+      <div class="oc-presets" id="oc-presets"></div>
+    </section>
+
+    <!-- Controls and result -->
+    <section class="oc-main">
+      <div class="oc-card oc-controls">
+
+        <div class="oc-field">
+          <div class="oc-field-head">
+            <span class="oc-label">Currency</span>
+          </div>
+          <div class="oc-seg" id="oc-currency" role="group" aria-label="Currency"></div>
+        </div>
+
+        <div class="oc-field">
+          <div class="oc-field-head">
+            <label class="oc-label" for="oc-upfront">Upfront price<small>One-time cost today</small></label>
+            <span class="oc-num"><span class="oc-pre" data-sym-pre></span><input type="number" id="oc-upfront" min="0" inputmode="numeric"><span class="oc-post" data-sym-post></span></span>
+          </div>
+          <input type="range" id="oc-upfront-range" min="0" aria-label="Upfront price">
+        </div>
+
+        <div class="oc-field">
+          <div class="oc-field-head">
+            <label class="oc-label" for="oc-monthly">Monthly cost<small>Habit, subscription or upkeep</small></label>
+            <span class="oc-num"><span class="oc-pre" data-sym-pre></span><input type="number" id="oc-monthly" min="0" inputmode="numeric"><span class="oc-post" data-sym-post></span><span class="oc-per">/mo</span></span>
+          </div>
+          <input type="range" id="oc-monthly-range" min="0" aria-label="Monthly cost">
+        </div>
+
+        <div class="oc-field">
+          <div class="oc-field-head">
+            <label class="oc-label" for="oc-return">Expected yearly return<small id="oc-return-note">Before inflation</small></label>
+            <span class="oc-value" id="oc-return-value"></span>
+          </div>
+          <input type="range" id="oc-return" min="2" max="14" step="0.5">
+          <div class="oc-chips" id="oc-bench" role="group" aria-label="Return examples"></div>
+        </div>
+
+        <div class="oc-field">
+          <div class="oc-field-head">
+            <label class="oc-label" for="oc-years">Time horizon<small>How far ahead to look</small></label>
+            <span class="oc-value" id="oc-years-value"></span>
+          </div>
+          <input type="range" id="oc-years" min="5" max="40" step="1">
+        </div>
+
+        <div class="oc-field">
+          <div class="oc-field-head">
+            <span class="oc-label">Resale value<small id="oc-type-note"></small></span>
+          </div>
+          <div class="oc-seg" id="oc-type" role="group" aria-label="Resale value"></div>
+        </div>
+
+        <div class="oc-field oc-switch-row">
+          <span class="oc-label" id="oc-real-label">Show in today's money<small>Adjusts for 2% yearly inflation</small></span>
+          <button type="button" class="oc-switch" id="oc-real" role="switch" aria-checked="false" aria-labelledby="oc-real-label"><span></span></button>
+        </div>
+      </div>
+
+      <div class="oc-card oc-result" aria-live="polite">
+        <div class="oc-row-head">
+          <span class="oc-small" id="oc-result-title"></span>
+          <span class="oc-mult" id="oc-mult"></span>
+        </div>
+        <p class="oc-big" id="oc-big"></p>
+        <p class="oc-muted" id="oc-big-note"></p>
+
+        <div class="oc-bars">
+          <div class="oc-bar-block">
+            <div class="oc-bar-head">
+              <span><i class="oc-dot oc-dot-invest"></i>If invested</span>
+              <strong id="oc-invested"></strong>
+            </div>
+            <div class="oc-bar"><span class="oc-fill oc-fill-cash" id="oc-bar-cash"></span><span class="oc-fill oc-fill-growth" id="oc-bar-growth"></span></div>
+            <div class="oc-bar-foot"><span id="oc-cash-share"></span><span id="oc-growth-share"></span></div>
+          </div>
+          <div class="oc-bar-block">
+            <div class="oc-bar-head">
+              <span><i class="oc-dot oc-dot-resale"></i>If spent</span>
+              <strong id="oc-resale"></strong>
+            </div>
+            <div class="oc-bar"><span class="oc-fill oc-fill-resale" id="oc-bar-resale"></span></div>
+            <div class="oc-bar-foot"><span id="oc-resale-note"></span></div>
+          </div>
+        </div>
+
+        <div class="oc-note">
+          <p id="oc-note-growth"></p>
+          <p id="oc-note-rule"></p>
+          <p>This only counts money. If the purchase gives you something you need, like a car for getting to work, that value isn't in these numbers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chart and table -->
+    <section class="oc-card oc-chart-card" aria-labelledby="oc-chart-title">
+      <div class="oc-chart-head">
+        <div>
+          <h2 id="oc-chart-title" class="oc-h2">Year by year</h2>
+          <p class="oc-muted" id="oc-chart-caption"></p>
+        </div>
+        <ul class="oc-legend" aria-hidden="true">
+          <li><i class="oc-dot oc-dot-invest"></i>If invested</li>
+          <li><i class="oc-dot oc-dot-cash"></i>Cash put in</li>
+          <li><i class="oc-dot oc-dot-resale"></i>Resale value</li>
+        </ul>
+      </div>
+      <div class="oc-chart" id="oc-chart" role="img" aria-label="Chart comparing invested value, cash put in and resale value over time. The table below has the same numbers."></div>
+
+      <details class="oc-details">
+        <summary>Show the numbers for each year</summary>
+        <div class="oc-table-wrap">
+          <table class="oc-table">
+            <thead>
+              <tr><th scope="col">Year</th><th scope="col">Cash put in</th><th scope="col">Growth that year</th><th scope="col">If invested</th><th scope="col">Resale value</th><th scope="col">Opportunity cost</th></tr>
+            </thead>
+            <tbody id="oc-tbody"></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- About the numbers -->
+    <section class="oc-about" aria-labelledby="oc-about-title">
+      <h2 id="oc-about-title" class="oc-small">About the numbers</h2>
+      <p>This is an illustration, not financial advice. Real returns vary from year to year and can be negative.</p>
+      <p>Money is invested at the start of each month and grows monthly. Fees and taxes are left out. In Sweden, for example, the yearly tax on an ISK account would lower the result.</p>
+      <p>With today's money switched on, every amount is shown in today's purchasing power, and your costs are assumed to rise with inflation. Resale values drop by a fixed share each year.</p>
+      <p>The 4% rule is a common rule of thumb from studies of 30-year retirements. The 10% figure is a commonly cited long-run average for the S&amp;P 500 before inflation. Preset amounts in EUR and USD are rounded conversions at 10 to 1.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="links">
+      <span>"A good measure should change behavior, not just record it."</span>
+    </div>
+    <div class="links">
+      <span>Built by Benjamin Linderoth</span>
+      <a href="index.html#opportunity-costs-made-simple">Back to projects</a>
+    </div>
+  </div>
+</footer>
+
+<script src="site.js"></script>
+<script src="opportunity-costs.js"></script>
+</body>
+</html>

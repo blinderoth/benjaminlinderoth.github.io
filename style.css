@@ -791,3 +791,179 @@ footer button.print-link:hover { color: var(--accent); }
   .fc-node { animation: none !important; }
   .fc-track.active { animation: none; }
 }
+
+/* Link from the project text to the calculator */
+.app-link {
+  font-family: var(--sans); font-size: 0.95rem; color: var(--accent);
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em;
+}
+
+/* =========================================================
+   Opportunity costs made simple (opportunity-costs.html)
+   ========================================================= */
+[data-page="oc"] { --invest: var(--accent); --cash: var(--ink); --resale: #B4884B; }
+.oc-hero { padding: clamp(3rem, 8vw, 6rem) 0 clamp(2rem, 4vw, 3rem); }
+.oc-hero h1 {
+  margin: 0; max-width: 16ch;
+  font-weight: 380; font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1; letter-spacing: -0.025em;
+}
+.oc-lede { margin: 1.5rem 0 0; max-width: 34rem; font-size: clamp(1.2rem, 2.4vw, 1.45rem); line-height: 1.4; color: var(--muted); }
+
+.oc-block { margin: 0 0 2rem; }
+.oc-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin: 0 0 0.9rem; }
+.oc-small { margin: 0; font-family: var(--sans); font-weight: 500; font-size: 0.9rem; color: var(--muted); }
+.oc-badge { font-family: var(--sans); font-size: 0.8rem; color: var(--accent); }
+.oc-muted { margin: 0; font-family: var(--sans); font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+.oc-h2 { margin: 0 0 0.25rem; font-weight: 450; font-size: 1.6rem; line-height: 1.2; }
+
+/* Presets */
+.oc-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
+.oc-preset {
+  display: flex; flex-direction: column; gap: 0.15rem; text-align: left;
+  padding: 0.9rem 1rem; cursor: pointer;
+  background: color-mix(in srgb, var(--paper) 55%, #fff);
+  border: 1px solid var(--rule); border-radius: 8px;
+  font: inherit; color: var(--ink);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.oc-preset:hover { border-color: var(--muted); }
+.oc-preset[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.oc-preset-name { font-size: 1.15rem; line-height: 1.25; }
+.oc-preset-sub { font-family: var(--sans); font-size: 0.82rem; color: var(--muted); }
+.oc-preset-cost { margin-top: 0.6rem; font-family: var(--sans); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Cards and layout */
+.oc-main { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 1.25rem; align-items: start; margin: 0 0 1.25rem; }
+.oc-card {
+  background: color-mix(in srgb, var(--paper) 55%, #fff);
+  border: 1px solid var(--rule); border-radius: 10px;
+  padding: clamp(1.1rem, 3vw, 1.75rem);
+}
+
+/* Controls */
+.oc-field { margin: 0 0 1.6rem; }
+.oc-field:last-child { margin-bottom: 0; }
+.oc-field-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; margin: 0 0 0.6rem; }
+.oc-label { font-size: 1.05rem; line-height: 1.25; }
+.oc-label small { display: block; margin-top: 0.1rem; font-family: var(--sans); font-size: 0.8rem; color: var(--muted); }
+.oc-num {
+  display: inline-flex; align-items: baseline; gap: 0.2rem; flex-shrink: 0;
+  padding: 0.3rem 0.55rem; border: 1px solid var(--rule); border-radius: 6px; background: #fff;
+  font-family: var(--sans); font-size: 0.85rem; color: var(--muted);
+}
+.oc-num:focus-within { border-color: var(--accent); }
+.oc-num input {
+  width: 6.5rem; border: 0; padding: 0; background: transparent; outline: none;
+  font: inherit; font-size: 0.95rem; color: var(--ink); text-align: right; font-variant-numeric: tabular-nums;
+}
+.oc-value { font-family: var(--sans); font-size: 0.95rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.oc-controls input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); cursor: pointer; }
+
+.oc-seg { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.oc-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
+.oc-seg button, .oc-chips button {
+  padding: 0.35rem 0.7rem; cursor: pointer;
+  background: transparent; border: 1px solid var(--rule); border-radius: 999px;
+  font-family: var(--sans); font-size: 0.82rem; color: var(--muted);
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+.oc-seg button:hover, .oc-chips button:hover { color: var(--ink); border-color: var(--muted); }
+.oc-seg button[aria-pressed="true"], .oc-chips button[aria-pressed="true"] {
+  color: #fff; background: var(--ink); border-color: var(--ink);
+}
+
+.oc-switch-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); }
+.oc-switch {
+  position: relative; flex-shrink: 0; width: 42px; height: 24px; padding: 0; cursor: pointer;
+  border: 0; border-radius: 999px; background: var(--rule); transition: background-color 0.2s;
+}
+.oc-switch span {
+  position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,0.15); transition: transform 0.2s;
+}
+.oc-switch[aria-checked="true"] { background: var(--accent); }
+.oc-switch[aria-checked="true"] span { transform: translateX(18px); }
+
+/* Result */
+.oc-mult { font-family: var(--sans); font-size: 0.85rem; color: var(--accent); text-align: right; }
+.oc-big {
+  margin: 0.2rem 0 0.4rem;
+  font-weight: 380; font-size: clamp(2.6rem, 6vw, 4.2rem); line-height: 1.05; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.oc-bars { margin: 1.6rem 0 0; padding-top: 1.4rem; border-top: 1px solid var(--rule); display: grid; gap: 1.4rem; }
+.oc-bar-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: 0.5rem; }
+.oc-bar-head span { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.05rem; }
+.oc-bar-head strong { font-weight: 450; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.oc-bar { display: flex; gap: 2px; height: 10px; border-radius: 999px; overflow: hidden; background: var(--paper); border: 1px solid var(--rule); }
+.oc-fill { height: 100%; transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.oc-fill-cash { background: var(--cash); opacity: 0.55; }
+.oc-fill-growth { background: var(--invest); }
+.oc-fill-resale { background: var(--resale); }
+.oc-bar-foot { display: flex; justify-content: space-between; gap: 1rem; margin-top: 0.4rem; font-family: var(--sans); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.oc-note { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); }
+.oc-note p { margin: 0 0 0.7rem; font-size: 1rem; line-height: 1.55; }
+.oc-note p:last-child { margin-bottom: 0; color: var(--muted); }
+
+.oc-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+.oc-dot-invest { background: var(--invest); }
+.oc-dot-cash { width: 14px; height: 0; border-radius: 0; border-top: 2px dashed var(--cash); opacity: 0.6; }
+.oc-dot-resale { background: var(--resale); }
+
+/* Chart */
+.oc-chart-card { margin: 0 0 2.5rem; }
+.oc-chart-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin: 0 0 1.25rem; }
+.oc-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; font-family: var(--sans); font-size: 0.82rem; color: var(--muted); }
+.oc-legend li { display: inline-flex; align-items: center; gap: 0.4rem; }
+.oc-chart { position: relative; width: 100%; touch-action: pan-y; }
+.oc-chart svg { display: block; overflow: visible; }
+.oc-grid { stroke: var(--rule); stroke-width: 1; }
+.oc-axis { font-family: var(--sans); font-size: 11px; fill: var(--muted); }
+.oc-area { fill: var(--invest); opacity: 0.09; }
+.oc-line-invest { fill: none; stroke: var(--invest); stroke-width: 2.5; stroke-linejoin: round; }
+.oc-line-cash { fill: none; stroke: var(--cash); stroke-width: 1.5; stroke-dasharray: 4 4; opacity: 0.6; }
+.oc-line-resale { fill: none; stroke: var(--resale); stroke-width: 2; }
+.oc-cross-dot { fill: var(--invest); stroke: #fff; stroke-width: 2; }
+.oc-guide, .oc-hdot { opacity: 0; transition: opacity 0.15s; }
+.oc-guide { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.oc-hdot { stroke: #fff; stroke-width: 2; }
+.oc-hdot-invested { fill: var(--invest); }
+.oc-hdot-cash { fill: var(--cash); }
+.oc-hdot-resale { fill: var(--resale); }
+.oc-chart.hover .oc-guide, .oc-chart.hover .oc-hdot { opacity: 1; }
+.oc-tip {
+  position: absolute; width: 210px; pointer-events: none;
+  padding: 0.6rem 0.75rem; background: #fff; border: 1px solid var(--rule); border-radius: 8px;
+  box-shadow: 0 8px 24px -12px rgba(28, 34, 48, 0.25);
+  font-family: var(--sans); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums;
+  opacity: 0; transition: opacity 0.15s;
+}
+.oc-chart.hover .oc-tip { opacity: 1; }
+.oc-tip strong { display: block; margin-bottom: 0.3rem; font-weight: 500; color: var(--ink); }
+.oc-tip span { display: block; }
+.oc-tip .oc-tip-total { margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid var(--rule); color: var(--ink); }
+
+.oc-details { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+.oc-details summary { cursor: pointer; font-family: var(--sans); font-size: 0.9rem; color: var(--muted); }
+.oc-details summary:hover { color: var(--accent); }
+.oc-table-wrap { overflow-x: auto; margin-top: 1rem; }
+.oc-table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.oc-table th, .oc-table td { padding: 0.55rem 0.75rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--rule); }
+.oc-table th:first-child { text-align: left; }
+.oc-table thead th { font-weight: 500; color: var(--muted); }
+.oc-table tbody th { font-weight: 400; color: var(--ink); }
+.oc-table td { color: var(--ink); }
+.oc-table tr.oc-cross { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.oc-about { max-width: 42rem; margin: 0 0 3rem; }
+.oc-about p { margin: 0.7rem 0 0; font-size: 1rem; line-height: 1.6; color: var(--muted); }
+
+[data-page="oc"] footer .wrap { align-items: baseline; }
+
+@media (max-width: 900px) {
+  .oc-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .oc-main { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .oc-fill, .oc-switch, .oc-switch span { transition: none; }
+}
