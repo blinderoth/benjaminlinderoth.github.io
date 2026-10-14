@@ -2,6 +2,7 @@
   var page = document.body.getAttribute('data-page') || '';
   var desktop = window.matchMedia('(min-width: 801px)');
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   /* ---------- Split headings into letters so each one can react to the cursor ---------- */
   var counter = 0;
@@ -19,30 +20,47 @@
     });
   });
 
+  /* ---------- Dates ---------- */
+  var now = new Date();
+  var nowM = now.getFullYear() * 12 + now.getMonth();
+  function monthOf(str) {
+    if (str === 'present') return nowM;
+    var p = str.split('-');
+    return (+p[0]) * 12 + (+p[1]) - 1;
+  }
+  function monthLabel(m) { return MONTHS[m % 12] + ' ' + Math.floor(m / 12); }
+  function durationText(months) {
+    var y = Math.floor(months / 12), m = months % 12, out = [];
+    if (y) out.push(y + (y === 1 ? ' year' : ' years'));
+    if (m) out.push(m + (m === 1 ? ' month' : ' months'));
+    return out.join(', ');
+  }
+  function slugify(text) {
+    return text.toLowerCase().replace(/&/g, 'and').replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
   /* ---------- Timelines with duration lines (Projects, Experience) ----------
      Titles sit under the year they ended. Each title carries
        data-start="YYYY-MM"  data-end="YYYY-MM" or "present".
      Selecting a title reveals any years its duration needs, then draws
      a slim line from the end date down to the start date. */
-  function monthOf(str, nowM) {
-    if (str === 'present') return nowM;
-    var p = str.split('-');
-    return (+p[0]) * 12 + (+p[1]) - 1;
-  }
-
   var REVEAL_MS = reduceMotion ? 0 : 520;
 
   function Timeline(wrap) {
     var tl = wrap.querySelector('.tl');
-    var now = new Date();
-    var nowM = now.getFullYear() * 12 + now.getMonth();
     var info = {};
     var minY = Infinity, maxY = -Infinity;
 
     tl.querySelectorAll('.item[data-start]').forEach(function (b) {
-      var s = monthOf(b.getAttribute('data-start'), nowM);
-      var e = monthOf(b.getAttribute('data-end'), nowM) + 1;
-      info[b.getAttribute('aria-controls')] = { s: s, e: e };
+      var endRaw = b.getAttribute('data-end');
+      var s = monthOf(b.getAttribute('data-start'));
+      var e = monthOf(endRaw) + 1;
+      info[b.getAttribute('aria-controls')] = {
+        s: s, e: e,
+        startText: monthLabel(s),
+        endText: endRaw === 'present' ? 'Now' : monthLabel(e - 1)
+      };
       minY = Math.min(minY, Math.floor(s / 12));
       maxY = Math.max(maxY, Math.floor((e - 1) / 12));
     });
@@ -58,16 +76,7 @@
         li.className = 'tl-year extra';
         li.setAttribute('data-year', Y);
         li.setAttribute('aria-hidden', 'true');
-        var inner = document.createElement('div');
-        inner.className = 'tl-inner';
-        var label = document.createElement('p');
-        label.className = 'tl-label';
-        label.textContent = Y;
-        var spacer = document.createElement('div');
-        spacer.className = 'tl-spacer';
-        inner.appendChild(label);
-        inner.appendChild(spacer);
-        li.appendChild(inner);
+        li.innerHTML = '<div class="tl-inner"><p class="tl-label">' + Y + '</p><div class="tl-spacer"></div></div>';
       }
       tl.appendChild(li); /* keeps rows in order, newest first */
       rows.push({ y: Y, li: li, extra: li.classList.contains('extra') });
@@ -78,6 +87,15 @@
     line.setAttribute('aria-hidden', 'true');
     line.innerHTML = '<i class="cap top"></i><i class="cap bottom"></i>';
     wrap.appendChild(line);
+
+    var dateTop = document.createElement('span');
+    dateTop.className = 'dur-date top';
+    dateTop.setAttribute('aria-hidden', 'true');
+    var dateBottom = document.createElement('span');
+    dateBottom.className = 'dur-date bottom';
+    dateBottom.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(dateTop);
+    wrap.appendChild(dateBottom);
 
     var current = null, token = 0;
 
@@ -96,7 +114,7 @@
       });
     }
 
-    /* Page position of any month, based on the visible year rows. */
+    /* Position of any month, based on the visible year rows. */
     function yAt(t) {
       var base = wrap.getBoundingClientRect().top;
       var vis = visibleRows().map(function (r) {
@@ -122,23 +140,41 @@
       return B[Yr] + (B[Yr + 1] - B[Yr]) * ((t - Yr * 12) / 12);
     }
 
+    function hideLine() {
+      [line, dateTop, dateBottom].forEach(function (el) { el.classList.remove('grow', 'on'); });
+    }
+
     function place(it, animate) {
       var top = yAt(it.e), bottom = yAt(it.s);
-      line.classList.remove('grow');
-      line.style.transition = 'none';
+      var height = Math.max(6, bottom - top);
+      [line, dateTop, dateBottom].forEach(function (el) {
+        el.classList.remove('grow', 'on');
+        el.style.transition = 'none';
+      });
       line.style.top = top + 'px';
-      line.style.height = Math.max(6, bottom - top) + 'px';
+      line.style.height = height + 'px';
+      dateTop.textContent = it.endText;
+      dateBottom.textContent = it.startText;
+      dateTop.style.top = (top + 3) + 'px';
+      dateBottom.style.top = (top + height - 3) + 'px';
       void line.offsetWidth;
-      if (animate) line.style.transition = '';
+      if (animate) [line, dateTop, dateBottom].forEach(function (el) { el.style.transition = ''; });
       line.classList.add('grow');
-      if (!animate) { void line.offsetWidth; line.style.transition = ''; }
+      dateTop.classList.add('on');
+      dateBottom.classList.add('on');
+      if (!animate) {
+        void line.offsetWidth;
+        [line, dateTop, dateBottom].forEach(function (el) { el.style.transition = ''; });
+      }
     }
+
+    this.has = function (id) { return !!info[id]; };
 
     this.select = function (id) {
       if (id && id === current) return;
       var my = ++token;
       var hadLine = line.classList.contains('grow');
-      line.classList.remove('grow');
+      hideLine();
       current = id || null;
 
       var it = id ? info[id] : null;
@@ -188,7 +224,30 @@
     resizeTimer = setTimeout(refreshAll, 150);
   });
 
-  /* ---------- Detail pane: shows the text of whatever title was clicked ---------- */
+  /* Durations under the date line of each Projects/Experience entry, and a link name for each. */
+  var usedSlugs = { overview: 1, projects: 1, experience: 1, interests: 1, top: 1 };
+  var slugToBtn = {};
+  document.querySelectorAll('.tl-wrap .item[data-start]').forEach(function (b) {
+    var detail = document.getElementById(b.getAttribute('aria-controls'));
+    var months = monthOf(b.getAttribute('data-end')) + 1 - monthOf(b.getAttribute('data-start'));
+    if (detail && months > 0) {
+      var span = document.createElement('p');
+      span.className = 'span';
+      span.textContent = durationText(months);
+      var where = detail.querySelector('.where');
+      if (where) where.insertAdjacentElement('afterend', span);
+      else detail.insertBefore(span, detail.querySelector('h3') ? detail.querySelector('h3').nextSibling : detail.firstChild);
+    }
+    var slug = slugify(b.textContent), n = 2, base = slug;
+    while (usedSlugs[slug]) slug = base + '-' + (n++);
+    usedSlugs[slug] = 1;
+    b.setAttribute('data-slug', slug);
+    slugToBtn[slug] = b;
+  });
+
+  /* ---------- Detail pane ---------- */
+  function isStepper(group) { return !!group.querySelector('.tl-wrap'); }
+
   function openDetail(group, id, trigger) {
     var pane = group.querySelector('.pane');
     var detail = document.getElementById(id);
@@ -204,13 +263,54 @@
     if (li) li.classList.add('open');
 
     pane.innerHTML = detail.innerHTML;
+
+    if (isStepper(group)) {
+      var items = Array.from(group.querySelectorAll('.item'));
+      var i = items.indexOf(trigger);
+      var tools = document.createElement('div');
+      tools.className = 'pane-tools';
+      tools.innerHTML = '<button type="button" class="copy-link">Copy link to this</button>';
+      pane.appendChild(tools);
+
+      var nav = document.createElement('div');
+      nav.className = 'pane-nav';
+      if (items[i - 1]) nav.appendChild(stepButton('prev', 'Previous', items[i - 1]));
+      if (items[i + 1]) nav.appendChild(stepButton('next', 'Next', items[i + 1]));
+      pane.appendChild(nav);
+    }
+
     pane.classList.remove('swap');
     void pane.offsetWidth;
     pane.classList.add('swap');
   }
 
+  function stepButton(cls, label, target) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = cls;
+    b.setAttribute('data-target', target.getAttribute('aria-controls'));
+    var small = document.createElement('small');
+    small.textContent = label;
+    var span = document.createElement('span');
+    span.textContent = target.textContent;
+    b.appendChild(small);
+    b.appendChild(span);
+    return b;
+  }
+
+  function linkFor(btn) {
+    return location.href.split('#')[0] + '#' + btn.getAttribute('data-slug');
+  }
+
+  function goTo(btn) {
+    btn.click();
+    btn.focus({ preventScroll: true });
+    btn.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  }
+
   /* Title lists: details open on the right, or under the title on phones. */
   document.querySelectorAll('[data-pane-group]').forEach(function (group) {
+    var stepper = isStepper(group);
     group.querySelectorAll('.item').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var id = btn.getAttribute('aria-controls');
@@ -226,9 +326,99 @@
           if (!group.contains(t.wrap)) return;
           t.select(t.wrap === myWrap && !closing ? id : null);
         });
+        if (stepper) {
+          btn.focus({ preventScroll: true });
+          if (closing) history.replaceState(null, '', location.pathname + location.search);
+          else history.replaceState(null, '', '#' + btn.getAttribute('data-slug'));
+        }
       });
     });
+
+    if (!stepper) return;
+    var pane = group.querySelector('.pane');
+    pane.addEventListener('click', function (e) {
+      var step = e.target.closest('.pane-nav button');
+      if (step) { goTo(document.querySelector('.item[aria-controls="' + step.getAttribute('data-target') + '"]')); return; }
+      var copy = e.target.closest('.copy-link');
+      if (copy) {
+        var active = group.querySelector('.item[aria-expanded="true"]');
+        if (!active) return;
+        var url = linkFor(active);
+        var done = function (msg) {
+          copy.textContent = msg;
+          setTimeout(function () { copy.textContent = 'Copy link to this'; }, 2000);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () { done('Link copied'); }, function () { done('The link is in your address bar'); });
+        } else {
+          done('The link is in your address bar');
+        }
+      }
+    });
   });
+
+  /* Arrow keys step through the titles of the section you are in. */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    var el = document.activeElement;
+    if (!el || !el.closest) return;
+    var group = el.closest('[data-pane-group]');
+    if (!group || !isStepper(group)) return;
+    var items = Array.from(group.querySelectorAll('.item'));
+    var active = group.querySelector('.item[aria-expanded="true"]') || (el.classList.contains('item') ? el : null);
+    var i = items.indexOf(active);
+    var target = i < 0 ? items[0] : items[i + (e.key === 'ArrowDown' ? 1 : -1)];
+    if (!target) return;
+    e.preventDefault();
+    goTo(target);
+  });
+
+  /* Shareable links: opening the page with #some-title selects that title. */
+  function openFromHash(scroll) {
+    var slug = decodeURIComponent(location.hash.slice(1));
+    var btn = slugToBtn[slug];
+    if (!btn) return;
+    if (btn.getAttribute('aria-expanded') !== 'true') btn.click();
+    if (scroll) btn.scrollIntoView({ block: 'center' });
+  }
+  if (Object.keys(slugToBtn).length) {
+    window.addEventListener('load', function () { setTimeout(function () { openFromHash(true); }, 60); });
+    window.addEventListener('hashchange', function () { openFromHash(true); });
+  }
+
+  /* ---------- Main page: header that follows, current section, print ---------- */
+  if (page === 'home') {
+    var header = document.querySelector('header');
+    var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    var navLinks = {};
+    document.querySelectorAll('header nav a[href^="#"]').forEach(function (a) { navLinks[a.getAttribute('href').slice(1)] = a; });
+    if ('IntersectionObserver' in window) {
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          var a = navLinks[en.target.id];
+          if (!a || !en.isIntersecting) return;
+          Object.keys(navLinks).forEach(function (k) {
+            navLinks[k].classList.remove('current');
+            navLinks[k].removeAttribute('aria-current');
+          });
+          a.classList.add('current');
+          a.setAttribute('aria-current', 'true');
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' });
+      Object.keys(navLinks).forEach(function (id) {
+        var sec = document.getElementById(id);
+        if (sec) spy.observe(sec);
+      });
+    }
+
+    document.querySelectorAll('[data-print]').forEach(function (b) {
+      b.addEventListener('click', function () { window.print(); });
+    });
+  }
 
   /* ---------- Cursor effects: only with a real pointer, and not for reduced motion ---------- */
   (function cursor() {
