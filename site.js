@@ -245,15 +245,12 @@
     slugToBtn[slug] = b;
   });
 
-  /* ---------- Interactive Flowchart Simulator ---------- */
-  var fcTimers = [];
-  function clearFlowTimers() {
-    fcTimers.forEach(clearTimeout);
-    fcTimers = [];
-  }
-
-  function clearFlowHighlights(widget) {
-    clearFlowTimers();
+  /* ---------- Flowchart widget (automation project) ----------
+     Uses event delegation, because the widget is copied into the detail pane
+     when the project is opened. */
+  function flowClear(widget) {
+    (widget._fcTimers || []).forEach(clearTimeout);
+    widget._fcTimers = [];
     widget.classList.remove('running');
     var label = widget.querySelector('.fc-run-label');
     if (label) label.textContent = 'Run trace';
@@ -262,51 +259,308 @@
     });
   }
 
-  function runFlowTrace(widget) {
-    if (widget.classList.contains('running')) {
-      clearFlowHighlights(widget);
-      return;
-    }
-    clearFlowHighlights(widget);
+  function flowRun(widget) {
+    if (widget.classList.contains('running')) { flowClear(widget); return; }
+    flowClear(widget);
+    var track = widget.querySelector('.fc-track.active');
+    if (!track) return;
     widget.classList.add('running');
     var label = widget.querySelector('.fc-run-label');
     if (label) label.textContent = 'Tracing...';
 
-    var activeTrack = widget.querySelector('.fc-track.active');
-    if (!activeTrack) return;
-
-    var nodes = Array.from(activeTrack.querySelectorAll('.fc-node'));
-    var arrows = Array.from(activeTrack.querySelectorAll('.fc-arrow'));
-    var isAuto = activeTrack.getAttribute('data-fc-panel') === 'auto';
-    var stepTime = isAuto ? 450 : 380;
+    var nodes = Array.from(track.querySelectorAll('.fc-node'));
+    var arrows = Array.from(track.querySelectorAll('.fc-arrow'));
+    var stepTime = reduceMotion ? 150 : (track.getAttribute('data-fc-panel') === 'auto' ? 450 : 380);
+    var timers = widget._fcTimers;
     var elapsed = 0;
 
     nodes.forEach(function (node, idx) {
-      fcTimers.push(setTimeout(function () {
+      var subSteps = Array.from(node.querySelectorAll('.fc-sub-pipeline span'));
+      timers.push(setTimeout(function () {
         nodes.forEach(function (n) { n.classList.remove('trace-active'); });
         node.classList.add('trace-active', 'trace-done');
         if (arrows[idx - 1]) arrows[idx - 1].classList.add('trace-done');
-
-        /* If subroutine node has internal steps, rapid-fire highlight them */
-        var subSteps = Array.from(node.querySelectorAll('.fc-sub-pipeline span'));
-        if (subSteps.length) {
-          subSteps.forEach(function (s, sIdx) {
-            fcTimers.push(setTimeout(function () {
-              subSteps.forEach(function (item) { item.classList.remove('sub-active'); });
-              s.classList.add('sub-active');
-            }, (sIdx + 1) * 160));
-          });
-        }
+        subSteps.forEach(function (sub, i) {
+          timers.push(setTimeout(function () {
+            subSteps.forEach(function (x) { x.classList.remove('sub-active'); });
+            sub.classList.add('sub-active');
+          }, (i + 1) * 160));
+        });
       }, elapsed));
-
-      var subCount = node.querySelectorAll('.fc-sub-pipeline span').length;
-      elapsed += stepTime + (subCount ? subCount * 170 : 0);
+      elapsed += stepTime + subSteps.length * 170;
     });
 
-    fcTimers.push(setTimeout(function () {
+    timers.push(setTimeout(function () {
       nodes.forEach(function (n) { n.classList.remove('trace-active'); });
-      node.classList && nodes[nodes.length - 1].querySelectorAll('.sub-active').forEach(function (s) { s.classList.remove('sub-active'); });
-      widget.querySelectorAll('.sub-active').forEach(function (s) { s.classList.remove('sub-active'); });
+      widget.querySelectorAll('.sub-active').forEach(function (x) { x.classList.remove('sub-active'); });
       widget.classList.remove('running');
       if (label) label.textContent = 'Replay trace';
-    },
+    }, elapsed + 200));
+  }
+
+  document.addEventListener('click', function (e) {
+    var tab = e.target.closest('[data-fc-mode]');
+    if (tab) {
+      var widget = tab.closest('.fc-widget');
+      if (!widget) return;
+      flowClear(widget);
+      var mode = tab.getAttribute('data-fc-mode');
+      widget.querySelectorAll('[data-fc-mode]').forEach(function (t) {
+        var on = t === tab;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      widget.querySelectorAll('.fc-track').forEach(function (tr) {
+        tr.classList.toggle('active', tr.getAttribute('data-fc-panel') === mode);
+      });
+      return;
+    }
+    var run = e.target.closest('[data-fc-run]');
+    if (run) {
+      var w = run.closest('.fc-widget');
+      if (w) flowRun(w);
+    }
+  });
+
+  /* ---------- Detail pane ---------- */
+  function isStepper(group) { return !!group.querySelector('.tl-wrap'); }
+
+  function openDetail(group, id, trigger) {
+    var pane = group.querySelector('.pane');
+    var detail = document.getElementById(id);
+    if (!pane || !detail) return;
+
+    group.querySelectorAll('.item').forEach(function (b) {
+      b.setAttribute('aria-expanded', 'false');
+      var li = b.closest('li');
+      if (li) li.classList.remove('open');
+    });
+    trigger.setAttribute('aria-expanded', 'true');
+    var li = trigger.closest('li');
+    if (li) li.classList.add('open');
+
+    pane.innerHTML = detail.innerHTML;
+
+    if (isStepper(group)) {
+      var items = Array.from(group.querySelectorAll('.item'));
+      var i = items.indexOf(trigger);
+      var tools = document.createElement('div');
+      tools.className = 'pane-tools';
+      tools.innerHTML = '<button type="button" class="copy-link">Copy link to this</button>';
+      pane.appendChild(tools);
+
+      var nav = document.createElement('div');
+      nav.className = 'pane-nav';
+      if (items[i - 1]) nav.appendChild(stepButton('prev', 'Previous', items[i - 1]));
+      if (items[i + 1]) nav.appendChild(stepButton('next', 'Next', items[i + 1]));
+      pane.appendChild(nav);
+    }
+
+    pane.classList.remove('swap');
+    void pane.offsetWidth;
+    pane.classList.add('swap');
+  }
+
+  function stepButton(cls, label, target) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = cls;
+    b.setAttribute('data-target', target.getAttribute('aria-controls'));
+    var small = document.createElement('small');
+    small.textContent = label;
+    var span = document.createElement('span');
+    span.textContent = target.textContent;
+    b.appendChild(small);
+    b.appendChild(span);
+    return b;
+  }
+
+  function linkFor(btn) {
+    return location.href.split('#')[0] + '#' + btn.getAttribute('data-slug');
+  }
+
+  function goTo(btn) {
+    btn.click();
+    btn.focus({ preventScroll: true });
+    btn.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  }
+
+  /* Title lists: details open on the right, or under the title on phones. */
+  document.querySelectorAll('[data-pane-group]').forEach(function (group) {
+    var stepper = isStepper(group);
+    group.querySelectorAll('.item').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('aria-controls');
+        var closing = btn.getAttribute('aria-expanded') === 'true' && !desktop.matches;
+        if (closing) {
+          btn.setAttribute('aria-expanded', 'false');
+          btn.closest('li').classList.remove('open');
+        } else {
+          openDetail(group, id, btn);
+        }
+        var myWrap = btn.closest('.tl-wrap');
+        timelines.forEach(function (t) {
+          if (!group.contains(t.wrap)) return;
+          t.select(t.wrap === myWrap && !closing ? id : null);
+        });
+        if (stepper) {
+          btn.focus({ preventScroll: true });
+          if (closing) history.replaceState(null, '', location.pathname + location.search);
+          else history.replaceState(null, '', '#' + btn.getAttribute('data-slug'));
+        }
+      });
+    });
+
+    if (!stepper) return;
+    var pane = group.querySelector('.pane');
+    pane.addEventListener('click', function (e) {
+      var step = e.target.closest('.pane-nav button');
+      if (step) { goTo(document.querySelector('.item[aria-controls="' + step.getAttribute('data-target') + '"]')); return; }
+      var copy = e.target.closest('.copy-link');
+      if (copy) {
+        var active = group.querySelector('.item[aria-expanded="true"]');
+        if (!active) return;
+        var url = linkFor(active);
+        var done = function (msg) {
+          copy.textContent = msg;
+          setTimeout(function () { copy.textContent = 'Copy link to this'; }, 2000);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(function () { done('Link copied'); }, function () { done('The link is in your address bar'); });
+        } else {
+          done('The link is in your address bar');
+        }
+      }
+    });
+  });
+
+  /* Arrow keys step through the titles of the section you are in. */
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    var el = document.activeElement;
+    if (!el || !el.closest) return;
+    var group = el.closest('[data-pane-group]');
+    if (!group || !isStepper(group)) return;
+    var items = Array.from(group.querySelectorAll('.item'));
+    var active = group.querySelector('.item[aria-expanded="true"]') || (el.classList.contains('item') ? el : null);
+    var i = items.indexOf(active);
+    var target = i < 0 ? items[0] : items[i + (e.key === 'ArrowDown' ? 1 : -1)];
+    if (!target) return;
+    e.preventDefault();
+    goTo(target);
+  });
+
+  /* Shareable links: opening the page with #some-title selects that title. */
+  function openFromHash(scroll) {
+    var slug = decodeURIComponent(location.hash.slice(1));
+    var btn = slugToBtn[slug];
+    if (!btn) return;
+    if (btn.getAttribute('aria-expanded') !== 'true') btn.click();
+    if (scroll) btn.scrollIntoView({ block: 'center' });
+  }
+  if (Object.keys(slugToBtn).length) {
+    window.addEventListener('load', function () { setTimeout(function () { openFromHash(true); }, 60); });
+    window.addEventListener('hashchange', function () { openFromHash(true); });
+  }
+
+  /* ---------- Main page: header that follows, current section, print ---------- */
+  if (page === 'home') {
+    var header = document.querySelector('header');
+    var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    var navLinks = {};
+    document.querySelectorAll('header nav a[href^="#"]').forEach(function (a) { navLinks[a.getAttribute('href').slice(1)] = a; });
+    if ('IntersectionObserver' in window) {
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          var a = navLinks[en.target.id];
+          if (!a || !en.isIntersecting) return;
+          Object.keys(navLinks).forEach(function (k) {
+            navLinks[k].classList.remove('current');
+            navLinks[k].removeAttribute('aria-current');
+          });
+          a.classList.add('current');
+          a.setAttribute('aria-current', 'true');
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' });
+      Object.keys(navLinks).forEach(function (id) {
+        var sec = document.getElementById(id);
+        if (sec) spy.observe(sec);
+      });
+    }
+
+    document.querySelectorAll('[data-print]').forEach(function (b) {
+      b.addEventListener('click', function () { window.print(); });
+    });
+  }
+
+  /* ---------- Cursor effects: only with a real pointer, and not for reduced motion ---------- */
+  (function cursor() {
+    var ok = window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion;
+    if (!ok) return;
+
+    var ring = document.querySelector('.ring');
+    var letters = Array.from(document.querySelectorAll('.name .ch'));
+    var x = -100, y = -100, rx = -100, ry = -100, started = false;
+
+    window.addEventListener('pointermove', function (e) {
+      x = e.clientX; y = e.clientY;
+      if (!started) { rx = x; ry = y; started = true; ring.classList.add('on'); }
+      letters.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        var d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+        el.style.setProperty('--t', Math.max(0, 1 - d / 170).toFixed(3));
+      });
+    });
+    document.addEventListener('pointerleave', function () {
+      ring.classList.remove('on');
+      started = false;
+      letters.forEach(function (el) { el.style.setProperty('--t', 0); });
+    });
+    document.addEventListener('pointerover', function (e) {
+      ring.classList.toggle('link', !!e.target.closest('a, button'));
+    });
+    document.addEventListener('pointerdown', function () { ring.classList.add('down'); });
+    document.addEventListener('pointerup', function () { ring.classList.remove('down'); });
+
+    (function loop() {
+      rx += (x - rx) * 0.18;
+      ry += (y - ry) * 0.18;
+      ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)';
+      requestAnimationFrame(loop);
+    })();
+  })();
+
+  /* ---------- Easter eggs: only on the main page ---------- */
+  if (page === 'home') {
+    /* Type "nudge" anywhere. */
+    var buf = '';
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+      buf = (buf + e.key.toLowerCase()).slice(-5);
+      if (buf === 'nudge') window.location.href = 'personal.html';
+    });
+
+    /* Click the B in the name three times. */
+    var firstLetter = document.querySelector('[data-split] .ch');
+    if (firstLetter) {
+      var clicks = 0, timer;
+      firstLetter.addEventListener('click', function () {
+        clicks++;
+        clearTimeout(timer);
+        timer = setTimeout(function () { clicks = 0; }, 1500);
+        if (clicks >= 3) window.location.href = 'personal.html';
+      });
+    }
+  }
+
+  /* Hint for anyone who opens the console. */
+  console.log(
+    '%cLooking around?',
+    'font: 600 15px Georgia, serif; color: #2F45E0;',
+    '\nThere is a page that is not on the CV. Try typing the word "nudge" anywhere on the site.'
+  );
+})();

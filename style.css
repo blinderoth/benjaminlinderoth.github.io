@@ -783,3 +783,11 @@ footer button.print-link:hover { color: var(--accent); }
   [data-page="home"] header .wrap > a:first-child { display: none; }
   [data-page="home"] header nav { width: 100%; justify-content: space-between; gap: 0.5rem; flex-wrap: nowrap; font-size: 0.9rem; }
 }
+/* Flowchart: not part of the printed CV, and no floating for reduced motion */
+@media print {
+  [data-page="home"] .fc-widget { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fc-node { animation: none !important; }
+  .fc-track.active { animation: none; }
+}
