@@ -142,6 +142,94 @@ header a:hover { color: var(--accent); }
 .detail { display: none; }
 .detail h3 { display: none; }
 
+/* Process comparison widget (Projects pane) */
+.process-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  font-family: var(--sans);
+}
+
+.process-col {
+  background: color-mix(in srgb, var(--paper) 60%, #fff);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.process-col.after {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 4%, var(--paper));
+}
+
+.process-tag {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.process-col.after .process-tag {
+  color: var(--accent);
+}
+
+.process-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+}
+
+.process-steps li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+}
+
+.process-steps strong {
+  font-weight: 500;
+}
+
+.process-steps .step-num {
+  font-size: 0.75rem;
+  color: var(--muted);
+  width: 1rem;
+  flex-shrink: 0;
+}
+
+.process-steps .auto {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  width: 2.3rem;
+  flex-shrink: 0;
+}
+
+.process-meta {
+  margin: 0.75rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--rule);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+@media (max-width: 600px) {
+  .process-compare {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Timeline */
 .tl { list-style: none; margin: 0; padding: 0 0 0 1.5rem; }
 .tl-year { position: relative; --gap: 1.75rem; margin: 0 0 var(--gap); }
@@ -390,6 +478,13 @@ footer button.print-link:hover { color: var(--accent); }
   [data-page="home"] .dur,
   [data-page="home"] .dur-date,
   [data-page="home"] .tl-year.extra { display: none !important; }
+
+  /* Add inside @media print */
+  [data-page="home"] .process-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; margin: 4pt 0; }
+  [data-page="home"] .process-col { background: none !important; border: 0.5pt solid #bbb; padding: 4pt 6pt; border-radius: 0; }
+  [data-page="home"] .process-tag { font-size: 7.5pt; margin-bottom: 3pt; color: #000; }
+  [data-page="home"] .process-steps li { font-size: 7.5pt; margin-bottom: 2pt; }
+  [data-page="home"] .process-meta { font-size: 7pt; margin-top: 3pt; padding-top: 2pt; color: #444; }
 
   [data-page="home"] .wrap { max-width: none; padding: 0; }
   [data-page="home"] .hero { padding: 0 0 6pt; }
